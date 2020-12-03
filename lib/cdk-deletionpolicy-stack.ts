@@ -3,16 +3,48 @@ import * as subs from '@aws-cdk/aws-sns-subscriptions';
 import * as sqs from '@aws-cdk/aws-sqs';
 import * as cdk from '@aws-cdk/core';
 
+import * as lambda from '@aws-cdk/aws-lambda';
+
 export class CdkDeletionpolicyStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queue = new sqs.Queue(this, 'CdkDeletionpolicyQueue', {
-      visibilityTimeout: cdk.Duration.seconds(300)
+    const handler = new lambda.Function(this, 'MyFunc', {
+      code: lambda.Code.fromInline('boom'),
+      handler: 'index.handler',
+      runtime: lambda.Runtime.NODEJS,
     });
-
-    const topic = new sns.Topic(this, 'CdkDeletionpolicyTopic');
-
-    topic.addSubscription(new subs.SqsSubscription(queue));
+    
+    const resource = handler.node.defaultChild as cdk.CfnResource;
+    resource.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+    
+    /* cfn template:
+        "MyFunc8A243A2C": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "boom"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "MyFuncServiceRole54065130",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs"
+      },
+      "DependsOn": [
+        "MyFuncServiceRole54065130"
+      ],
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "CdkDeletionpolicyStack/MyFunc/Resource"
+      }
+    },
+    
+    */
+    
   }
 }
