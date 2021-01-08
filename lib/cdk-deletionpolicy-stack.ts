@@ -16,7 +16,12 @@ export class CdkDeletionpolicyStack extends cdk.Stack {
     });
     
     const resource = handler.node.defaultChild as cdk.CfnResource;
-    resource.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+    resource.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    /*
+    resource.cfnOptions.deletionPolicy = cdk.RemovalPolicy.RETAIN;
+    resource.cfnOptions.updateReplacePolicy = cdk.RemovalPolicy.RETAIN;
+    */
+    
     
     /* cfn template:
         "MyFunc8A243A2C": {
